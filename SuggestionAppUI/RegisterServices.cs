@@ -1,0 +1,16 @@
+﻿namespace SuggestionAppUI
+{
+    public static class RegisterServices
+    {
+        public static void ConfigureServices(this WebApplicationBuilder builder)
+        {
+            // Add services to the container.
+            builder.Services.AddRazorPages();
+            builder.Services.AddServerSideBlazor();
+   
+            // Register all dependencies here
+
+
+        }
+    }
+}
