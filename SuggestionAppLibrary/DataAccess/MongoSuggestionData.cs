@@ -103,7 +103,7 @@ namespace SuggestionAppLibrary.DataAccess
 
                 _cache.Remove(cacheName);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 await session.AbortTransactionAsync();
                 throw;
@@ -132,7 +132,7 @@ namespace SuggestionAppLibrary.DataAccess
                 await session.CommitTransactionAsync();
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 await session.AbortTransactionAsync();
                 throw;
