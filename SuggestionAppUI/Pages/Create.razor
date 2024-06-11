@@ -1,0 +1,98 @@
+﻿@page "/create"
+@using SuggestionAppUI.Components
+@using SuggestionAppUI.Models
+
+@inject ICategoryData categoryData
+@inject ISuggestionData suggestionData
+@inject NavigationManager navManager
+@inject IUserData userData
+
+
+<h1>Make A Suggestion</h1>
+
+<div>
+    <div>
+        <button @onclick="ClosePage">Close</button>
+    </div>
+    @if(categories is not null)
+    {
+        
+    }
+
+    <EditForm Model="createSuggestion" OnValidSubmit="CreateSuggestion">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div>
+            <label for="suggestion-text">Suggestion</label>
+            <div>Focus on the topic or technology you want to learn about.</div>
+            <InputText id="suggestion-text" @bind-Value="createSuggestion.Suggestion" />
+        </div>
+        <div>
+            <label for="category">Category</label>
+            <div>Choose one category.</div>
+            <div>
+              <MyInputRadioGroup id="category" @bind-Value="createSuggestion.CategoryId">
+                @foreach (var c in categories)
+                {
+                  <div>
+                      <InputRadio id="@c.Id" Value="@c.Id" />
+                      <label for="@c.Id">@c.CategoryName - @c.CategoryDescription</label>
+                  </div>
+                }
+              </MyInputRadioGroup>
+            </div>
+        </div>
+        <div>
+            <label for="description">Description</label>
+            <div>Briefly describe your suggestion.</div>
+            <InputTextArea id="description" @bind-Value="createSuggestion.Description" />
+        </div>
+
+        <div>
+            <button type="submit">Suggest</button>
+        </div>
+    </EditForm>
+
+
+</div>
+
+@code {
+    private CreateSuggestionModel createSuggestion = new();
+    private List<CategoryModel> categories;
+    private UserModel loggedInUser;
+
+    protected override async Task OnInitializedAsync()
+    {
+        categories = await categoryData.GetAllCategories();
+
+        //TODO - Remove this line when authentication is implemented
+        loggedInUser = await userData.GetUserFromAuthentication("abc123");
+    }
+
+    private void ClosePage()
+    {
+        navManager.NavigateTo("/");
+    }
+
+    private async Task CreateSuggestion()
+    {
+        //doing a manual mapping. Dont want to put this in the library because it is UI specific
+        SuggestionModel s = new();
+        s.Suggestion = createSuggestion.Suggestion;
+        s.Description = createSuggestion.Description;
+        s.Author = new BasicUserModel(loggedInUser);
+        s.Category = categories.Where(x => x.Id == createSuggestion.CategoryId).FirstOrDefault();
+
+        if(s.Category is null)
+        {
+            createSuggestion.CategoryId = "";
+            return;
+        }
+
+        await suggestionData.CreateSuggestion(s);
+
+        //wipout the suggestion
+        createSuggestion = new();
+        ClosePage();
+    }
+}
