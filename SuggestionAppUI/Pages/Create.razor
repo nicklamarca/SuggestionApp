@@ -1,4 +1,5 @@
 ﻿@page "/create"
+@attribute [Authorize]
 @using SuggestionAppUI.Components
 @using SuggestionAppUI.Models
 
@@ -6,6 +7,8 @@
 @inject ISuggestionData suggestionData
 @inject NavigationManager navManager
 @inject IUserData userData
+
+@inject AuthenticationStateProvider authProvider
 
 
 <h1>Make A Suggestion</h1>
@@ -66,7 +69,9 @@
         categories = await categoryData.GetAllCategories();
 
         //TODO - Remove this line when authentication is implemented
-        loggedInUser = await userData.GetUserFromAuthentication("abc123");
+        var authState = await authProvider.GetAuthenticationStateAsync();
+        string objectId = authState.User.Claims.FirstOrDefault(c => c.Type.Contains("objectidentifier"))?.Value;
+        loggedInUser = await userData.GetUserFromAuthentication(objectId);
     }
 
     private void ClosePage()

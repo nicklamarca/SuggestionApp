@@ -1,4 +1,5 @@
 ﻿@page "/adminapproval"
+@attribute [Authorize(Policy = "Admin")]
 @inject ISuggestionData suggestionData
 @inject IUserData userData
 @inject NavigationManager navManager
