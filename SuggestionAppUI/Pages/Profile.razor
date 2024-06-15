@@ -4,6 +4,8 @@
 @inject ISuggestionData suggestionData
 @inject NavigationManager navManager
 
+@inject AuthenticationStateProvider authProvider
+
 <h1>My Profile</h1>
 <div>
     <div>
@@ -178,8 +180,7 @@
 
     protected async override Task OnInitializedAsync()
     {
-        //TODO - Remove this line when authentication is implemented
-        loggedInUser = await userData.GetUserFromAuthentication("abc123");
+        loggedInUser = await authProvider.GetUserFromAuth(userData);
 
         var results = await suggestionData.GetUsersSuggestions(loggedInUser.Id);
 
