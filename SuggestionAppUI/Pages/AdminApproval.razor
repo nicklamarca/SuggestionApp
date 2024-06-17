@@ -1,75 +1,76 @@
-﻿@page "/adminapproval"
+﻿@page "/AdminApproval"
 @attribute [Authorize(Policy = "Admin")]
 @inject ISuggestionData suggestionData
 @inject IUserData userData
 @inject NavigationManager navManager
 
-<h1>Pending Submissions</h1>
-<div>
-    <div>@submissions?.Count Submissions</div>
-    <div>
-        <button @onclick="ClosePage"></button>
+<h1 class="page-heading text-uppercase mb-4">Pending Submissions</h1>
+
+<div class="row">
+    <div class="suggestions-count col-8 mt-2">@submissions?.Count Submissions</div>
+    <div class="col-4 close-button-section">
+        <button class="btn btn-close" @onclick="ClosePage"></button>
     </div>
 </div>
 
-@if(submissions is not null)
+@if (submissions is not null)
 {
-    @foreach(var s in submissions)
+    foreach (var s in submissions)
     {
-        <div>
-            <div>
-                <button @onclick="(() => ApproveSubmission(s))">Approve</button>
-                <button @onclick="(() => RejectSubmission(s))">Reject</button>
+        <div class="row submission">
+            <div class="col-lg-2 col-md-3 col-sm-4">
+                <button class="btn btn-approve" @onclick="(() => ApproveSubmission(s))">Approve</button>
+                <button class="btn btn-reject" @onclick="(() => RejectSubmission(s))">Reject</button>
             </div>
-            <div>
+            <div class="col-lg-10 col-md-9 col-sm-8">
                 <div>
-                    @if(currentEditingTitle == s.Id)
+                    @if (currentEditingTitle == s.Id)
                     {
-                        <EditForm Model="@editedTitle" OnSubmit="(() => SaveTitle(s))">
-                            <InputText @bind-Value="editedTitle" />
-                            <button type="submit">
-                                <span class="oi oi-check"></span>
+                        <EditForm class="approval-edit-form" Model="@editedTitle" OnSubmit="(() => SaveTitle(s))">
+                            <InputText class="form-control approval-edit-field" @bind-Value="editedTitle" />
+                            <button class="btn" type="submit">
+                                <span class="oi oi-check submission-edit-approve"></span>
                             </button>
-                            <button @onclick="(() => currentEditingTitle = String.Empty)">
-                                <span class="oi oi-x"></span>
+                            <button type="button" class="btn" @onclick="(() => currentEditingTitle = string.Empty)">
+                                <span class="oi oi-x submission-edit-reject"></span>
                             </button>
                         </EditForm>
                     }
                     else
                     {
-                       @s.Suggestion
-                       <span class="oi oi-pencil" @onclick="(() => EditTitle(s))"></span>            
+                        @s.Suggestion
+                        <span class="oi oi-pencil submission-edit-icon" @onclick="(() => EditTitle(s))"></span>
                     }
                 </div>
-                <div>@s.Category.CategoryName</div>
-                <div>@s.Author.DisplayName</div>
                 <div>
-                    @if(currentEditingDescription == s.Id)
+                    @s.Category.CategoryName
+                </div>
+                <div>
+                    @s.Author.DisplayName
+                </div>
+                <div>
+                    @if (currentEditingDescription == s.Id)
                     {
-                        <EditForm Model="@editedDescription" OnSubmit="(() => SaveDescription(s))">
-                            <InputTextArea @bind-Value="editedDescription" />
-                            <button type="submit">
-                                <span class="oi oi-check"></span>
+                        <EditForm class="approval-edit-form" Model="@editedDescription" OnSubmit="(() => SaveDescription(s))">
+                            <InputText class="form-control approval-edit-field" @bind-Value="editedDescription" />
+                            <button class="btn" type="submit">
+                                <span class="oi oi-check submission-edit-approve"></span>
                             </button>
-                            <button @onclick="(() => currentEditingDescription = String.Empty)">
-                                <span class="oi oi-x"></span>
+                            <button type="button" class="btn" @onclick="(() => currentEditingDescription = string.Empty)">
+                                <span class="oi oi-x submission-edit-reject"></span>
                             </button>
                         </EditForm>
                     }
                     else
                     {
                         @s.Description
-                        <span class="oi oi-pencil" @onclick="(() => EditDescription(s))"></span>
+                        <span class="oi oi-pencil submission-edit-icon" @onclick="(() => EditDescription(s))"></span>
                     }
                 </div>
             </div>
         </div>
-
-
     }
 }
-
-
 
 @code {
     private List<SuggestionModel> submissions;
@@ -79,7 +80,7 @@
     private string currentEditingDescription = "";
     private string editedDescription = "";
 
-    protected override async Task OnInitializedAsync()
+    protected async override Task OnInitializedAsync()
     {
         submissions = await suggestionData.GetAllSuggestionsWaitingForAppoval();
     }
@@ -101,14 +102,14 @@
     private void EditTitle(SuggestionModel model)
     {
         editingModel = model;
-        currentEditingTitle = model.Suggestion;
+        editedTitle = model.Suggestion;
         currentEditingTitle = model.Id;
         currentEditingDescription = "";
     }
 
     private async Task SaveTitle(SuggestionModel model)
     {
-        currentEditingTitle = "";
+        currentEditingTitle = string.Empty;
         model.Suggestion = editedTitle;
         await suggestionData.UpdateSuggestion(model);
     }
@@ -123,7 +124,7 @@
 
     private async Task SaveDescription(SuggestionModel model)
     {
-        currentEditingDescription = "";
+        currentEditingDescription = string.Empty;
         model.Description = editedDescription;
         await suggestionData.UpdateSuggestion(model);
     }
@@ -132,5 +133,4 @@
     {
         navManager.NavigateTo("/");
     }
-
 }
